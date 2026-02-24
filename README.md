@@ -1,11 +1,72 @@
 # cmcode
 
+```
+        ╔═══════════════╗
+        ║  ┌─────────┐  ║
+        ║  │ ◉     ◉ │  ║
+        ║  │  ═════  │  ║
+        ║  └─────────┘  ║
+        ║    ┌─────┐    ║
+        ║    │░░░░░│    ║
+        ║    └──┬──┘    ║
+        ║   ┌─┘   └─┐   ║
+        ╚═══════════════╝
+
+             CMCODE
+  AI assistant with tool-calling superpowers
+```
+
 A CLI tool for chatting with LLMs with tool-calling capabilities.
 
-## Installation
+## Prerequisites
+
+- Python 3.10+
+- An Azure OpenAI API key
+
+## Setup
+
+### 1. Clone and install
 
 ```bash
+git clone <repository-url>
+cd cmcode
 pip install -e .
+```
+
+### 2. Set up your API key
+
+Create a `.env` file in the project directory:
+
+```bash
+AZURE_OPENAI_API_KEY=your-api-key-here
+```
+
+Or export it directly:
+
+```bash
+export AZURE_OPENAI_API_KEY=your-api-key-here
+```
+
+### 3. Add to PATH (if needed)
+
+If `cmcode` is not found after installation, add the Python bin directory to your PATH:
+
+```bash
+# Find where pip installed the script
+pip show cmcode | grep Location
+
+# Add to PATH (example for macOS/Linux)
+export PATH="$PATH:$HOME/Library/Python/3.10/bin"
+
+# Or add to your shell config (~/.zshrc or ~/.bashrc)
+echo 'export PATH="$PATH:$HOME/Library/Python/3.10/bin"' >> ~/.zshrc
+```
+
+### 4. Verify installation
+
+```bash
+cmcode --version
+cmcode --help
 ```
 
 ## Usage
@@ -72,7 +133,3 @@ The assistant has access to these tools:
 - `read_file` - Reads file contents
 - `write_file` - Writes content to files (with safety checks)
 - `execute_bash` - Executes bash commands
-
-## License
-
-MIT
