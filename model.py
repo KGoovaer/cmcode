@@ -19,6 +19,14 @@ client = OpenAI(
     api_key=api_key
 )
 
+# Load system prompt from file
+def load_system_prompt():
+    """Load the system prompt from system-prompt.md file."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    prompt_path = os.path.join(script_dir, "system-prompt.md")
+    with open(prompt_path, "r") as f:
+        return f.read().strip()
+
 
 def send_to_llm(conversation):
     """Send the entire conversation history to the LLM and return the response."""
@@ -32,8 +40,9 @@ def send_to_llm(conversation):
 def main():
     print("Chat with the LLM. Type 'exit' to quit.\n")
     
-    # Initialize conversation history list
-    conversation = []
+    # Load system prompt and initialize conversation with it
+    system_prompt = load_system_prompt()
+    conversation = [{"role": "system", "content": system_prompt}]
     
     while True:
         user_input = input("You: ")
