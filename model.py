@@ -20,21 +20,20 @@ client = OpenAI(
 )
 
 
-def send_to_llm(user_input):
+def send_to_llm(conversation):
+    """Send the entire conversation history to the LLM and return the response."""
     completion = client.chat.completions.create(
         model=deployment_name,
-        messages=[
-            {
-                "role": "user",
-                "content": user_input,
-            }
-        ],
+        messages=conversation,
     )
     return completion.choices[0].message.content
 
 
 def main():
     print("Chat with the LLM. Type 'exit' to quit.\n")
+    
+    # Initialize conversation history list
+    conversation = []
     
     while True:
         user_input = input("You: ")
@@ -43,7 +42,15 @@ def main():
             print("Goodbye!")
             break
         
-        response = send_to_llm(user_input)
+        # Add user message to conversation history
+        conversation.append({"role": "user", "content": user_input})
+        
+        # Send entire conversation to LLM
+        response = send_to_llm(conversation)
+        
+        # Add assistant response to conversation history
+        conversation.append({"role": "assistant", "content": response})
+        
         print(f"Assistant: {response}\n")
 
 
