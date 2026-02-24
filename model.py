@@ -22,6 +22,23 @@ tools = [
             "name": "get_secret",
             "description": "Gets the magical secret value"
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Reads the contents of a file and returns it as a string",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "description": "The path to the file to read"
+                    }
+                },
+                "required": ["file_path"]
+            }
+        }
     }
 ]
 
@@ -45,6 +62,25 @@ def execute_tool(tool_name, tool_arguments):
     if tool_name == "get_secret":
         # Return the hardcoded secret value
         return "42"
+    elif tool_name == "read_file":
+        # Parse arguments from JSON
+        arguments = json.loads(tool_arguments)
+        file_path = arguments.get("file_path")
+        
+        if not file_path:
+            return "Error: file_path parameter is required"
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            return f"Error: File '{file_path}' not found"
+        
+        try:
+            # Read the file contents
+            with open(file_path, "r", encoding="utf-8") as f:
+                contents = f.read()
+            return contents
+        except Exception as ex:
+            return f"Error reading file: {str(ex)}"
     else:
         return f"Unknown tool: {tool_name}"
 
