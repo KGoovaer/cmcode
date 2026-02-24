@@ -1,5 +1,6 @@
 import os
 import json
+import subprocess
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -58,6 +59,23 @@ tools = [
                     }
                 },
                 "required": ["file_path", "content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_bash",
+            "description": "Executes a bash command and returns the output. Use this to run scripts, check files, execute programs, etc.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The bash command to execute"
+                    }
+                },
+                "required": ["command"]
             }
         }
     }
@@ -149,6 +167,35 @@ def execute_tool(tool_name, tool_arguments):
             return f"Successfully wrote {len(content)} characters to {file_path}"
         except Exception as ex:
             return f"Error writing file: {str(ex)}"
+    elif tool_name == "execute_bash":
+        # Parse arguments from JSON
+        arguments = json.loads(tool_arguments)
+        command = arguments.get("command")
+        
+        if not command:
+            return "Error: command parameter is required"
+        
+        try:
+            # Execute the bash command with timeout
+            result = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=30  # 30 second timeout
+            )
+            
+            output = result.stdout
+            error = result.stderr
+            
+            if result.returncode != 0:
+                return f"Command failed with exit code {result.returncode}\nError: {error}\nOutput: {output}"
+            
+            return output if output else "Command executed successfully (no output)"
+        except subprocess.TimeoutExpired:
+            return "Error: Command timed out after 30 seconds"
+        except Exception as ex:
+            return f"Error executing command: {str(ex)}"
     else:
         return f"Unknown tool: {tool_name}"
 
