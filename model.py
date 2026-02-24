@@ -113,7 +113,31 @@ def execute_tool(tool_name, tool_arguments):
         if content is None:
             return "Error: content parameter is required"
         
+        # Security: Size limit (1MB)
+        MAX_FILE_SIZE = 1_000_000
+        if len(content) > MAX_FILE_SIZE:
+            return f"Error: Content exceeds {MAX_FILE_SIZE} byte limit"
+        
+        # Security: Directory sandboxing - restrict to workspace directory
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        allowed_directory = os.path.abspath(script_dir)
+        full_path = os.path.abspath(file_path)
+        
+        if not full_path.startswith(allowed_directory):
+            return f"Error: Can only write files within {allowed_directory}"
+        
+        # Security: Blocklist sensitive paths
+        BLOCKED_PATTERNS = [".ssh", ".bashrc", ".zshrc", ".env", "id_rsa", "/etc/", "/usr/", ".git/"]
+        if any(pattern in full_path for pattern in BLOCKED_PATTERNS):
+            return "Error: Cannot write to sensitive locations"
+        
         try:
+            # Check if file exists and ask for confirmation
+            if os.path.exists(file_path):
+                confirm = input(f"File '{file_path}' already exists. Overwrite? [y/N]: ")
+                if confirm.lower() != 'y':
+                    return f"Write cancelled: File '{file_path}' was not overwritten"
+            
             # Ensure directory exists
             directory = os.path.dirname(file_path)
             if directory and not os.path.exists(directory):
