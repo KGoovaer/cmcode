@@ -39,6 +39,27 @@ tools = [
                 "required": ["file_path"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Writes content to a file. Creates the file if it doesn't exist, overwrites if it does.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "description": "The path where the file should be written"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The content to write to the file"
+                    }
+                },
+                "required": ["file_path", "content"]
+            }
+        }
     }
 ]
 
@@ -81,6 +102,29 @@ def execute_tool(tool_name, tool_arguments):
             return contents
         except Exception as ex:
             return f"Error reading file: {str(ex)}"
+    elif tool_name == "write_file":
+        # Parse arguments from JSON
+        arguments = json.loads(tool_arguments)
+        file_path = arguments.get("file_path")
+        content = arguments.get("content")
+        
+        if not file_path:
+            return "Error: file_path parameter is required"
+        if content is None:
+            return "Error: content parameter is required"
+        
+        try:
+            # Ensure directory exists
+            directory = os.path.dirname(file_path)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory)
+            
+            # Write the file contents
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            return f"Successfully wrote {len(content)} characters to {file_path}"
+        except Exception as ex:
+            return f"Error writing file: {str(ex)}"
     else:
         return f"Unknown tool: {tool_name}"
 
